@@ -1,0 +1,101 @@
+AUDIT 5 - SECURITE (configuration Django + code, relecture manuelle)
+=============================================================
+Date : 2026-08-30
+Auditeur : agent superviseur (lecture seule, aucune modif de code metier)
+Perimetre : comptes, produits, ventes, administration, frontend, scannier
+
+----------------------------------------------------------------------
+1. OUTILS AUTOMATISES
+----------------------------------------------------------------------
+bandit -r . (excl. migrations/tests/pycache) : 0 issue (H/M/L = 0/0/0), 1389 lignes.
+  * Limite : bandit ne detecte PAS l'injection HTML via f-string (autoescape
+    Jinja2 B703/B704 uniquement). Resultat "propre" trompeur -> voir H1.
+
+manage.py check --deploy : 14 issues
+  - Securite : security.W004 (HSTS non configure), W008 (SECURE_SSL_REDIRECT),
+    W012 (SESSION_COOKIE_SECURE), W016 (CSRF_COOKIE_SECURE), W018 (DEBUG=True).
+  - 9x drf_spectacular.W002 (avertissements schema, non critiques).
+  Causes : DEBUG=True par defaut (settings.py:36) et SECURE_MODE=False par defaut
+  (settings.py:39) -> HSTS/SSL/cookies securises desactives. .env.example propage
+  ces defauts (DJANGO_DEBUG=True, DJANGO_SECURE=False).
+
+----------------------------------------------------------------------
+2. FAUX PAR GRAVITE (plus critique -> moins critique)
+----------------------------------------------------------------------
+HIGH
+  H1 XSS stocke dans administration/views.py (page statistiques superuser)
+     - administration/views.py:100-108 puis :110-130 : produit__nom (Produit.nom,
+       controle par le marchand) et nom_boutique (Marchand.nom_boutique, controle
+       par le marchand) injectes SANS echappement dans HttpResponse(html).
+     - Risque : marchand malveillant definit nom_boutique=<script>...</script> ;
+       le superuser (proprietaire) consultant /admin/statistiques/ execute le
+       script -> prise de controle du compte owner.
+     - Correction : django.utils.html.escape(...) sur chaque valeur, ou rendu via
+       template Django (autoescape actif).
+
+  H2 Configuration prod dangereuse par defaut (DEBUG/SECURE)
+     - settings.py:36 DEBUG defaut True ; settings.py:39 SECURE_MODE defaut False.
+     - check --deploy echoue (W018/W004/W008/W012/W016).
+     - Correction : DJANGO_DEBUG=False et DJANGO_SECURE=True obligatoires en prod ;
+       fail-fast si SECURE_MODE non positionne avec ALLOWED_HOSTS non local.
+
+MEDIUM
+  M1 produits/services.py:10-15 : creer_produit reference un champ supprime (code_barre)
+     - Produit n'a plus de code_barre (retire migration 0002). create(..., code_barre=...)
+       leve TypeError. Code mort mais casse ; aucune vue ne l'appelle.
+       Aucun endpoint de creation de produit n'existe (produits/views.py = GET only).
+     - Correction : supprimer creer_produit ou le reécrire sans code_barre.
+
+  M2 ventes/views.py : doublons de classes (logique contradictoire entre agents)
+     - VenteSyncView defini 2x (:140-228 puis :295-379) ; TicketEscPosView 2x
+       (:231-250 puis :253-271). La 2e ecrase la 1re -> seule la version basse est
+       exposee (ventes/urls.py:7,11). Code mort contradictoire.
+     - Correction : supprimer les definitions mortes, garder une seule version.
+
+LOW
+  L1 Champs de modele definis en double
+     - produits/models.py:49-50 date_modification 2x (2e auto_now=True ecrase 1er).
+     - ventes/models.py:41-50 id_local 2x (max_length 120 puis 64 ; le 2e gagne,
+       coherent migration 0003 a 64). Redondance/contradiction, a nettoyer.
+  L2 Middleware : suspension employe non verifiee si user est aussi marchand (patron)
+     - administration/middleware.py:18-34 : si user.marchand existe, branche employe
+       sautee -> patron individuellement suspendu non bloque par le middleware.
+       Non exploitable car toutes les vues appellent exiger_compte_actif(emp)
+       (ventes/views.py:38-45). Correction : verifier employe.actif meme si marchand existe.
+  L3 statistiques_globales melange auth admin HTML et logique API
+     - administration/views.py:87 @staff_member_required (redirect /admin/login/) sur
+       endpoint HTML/JSON heterogene vs reste API (JWT).
+  L4 health_check public expose horodatage/etat DB
+     - administration/views.py:15-32 /api/health/ sans auth. Divulgation mineure.
+
+INFO / COHERENCE
+  I1 Frontend<->Backend coherent : login (/comptes/login/ -> simplejwt access/refresh
+     consomme login.js:26), catalogue-sync (produits OK), POST /ventes/, …/lignes/,
+     …/finaliser/, …/annuler/, …/qr/, GET /ventes/, POST /ventes/sync/ (payload
+     {ventes:[{id_local,date_heure_creation,lignes:[{id_qr,quantite}]}]} OK). Aucun
+     endpoint appele manquant cote backend.
+  I2 role envoye au login mais ignore par backend (simplejwt ne renvoie pas role/nom).
+  I3 Distinction patron/employe peu appliquee : role utilise seul au scoped lecture et
+     modification de ses propres ventes (acces_vente, ventes/views.py:48-60). Aucun
+     endpoint patron-only (catalogue/employes) n'existe ni n'est protege.
+  I4 Isolation inter-marchands : AUCUNE faille. Toutes les vues filtrent par
+     emp.marchand (produits) ou marchand=emp.marchand + scope employe (ventes). Pas d'IDOR.
+
+----------------------------------------------------------------------
+3. SCORE GLOBAL DE CONFIANCE
+----------------------------------------------------------------------
+  Isolation inter-marchands ................ Solide
+  Permissions employe/patron ................ Correct sur ventes ; role sous-exploite (I3)
+  Exposition donnees sensibles (mdp/token) . Aucune fuite (login renvoie token seul)
+  Coherence frontend/backend ................ Endpoints/champs alignes (I1)
+  Securite config prod ..................... Defaut dangereux (H2)
+  Injection / XSS .......................... XSS stocke superuser (H1)
+  Qualite/coherence code multi-agents ...... Doublons contradictoires (M1,M2,L1)
+
+  CONFIANCE GLOBALE : 6/10
+  -> (1) XSS stocke compromet le compte owner, (2) config prod ouverte par defaut,
+     (3) doublons de code morts/contradictoires (2x VenteSyncView, 2x TicketEscPosView,
+     champ code_barre fantome) a nettoyer avant livraison.
+
+Aucun fichier de code modifie. Corrections = suggestions ; rien n'est corrige sans
+accord explicite.

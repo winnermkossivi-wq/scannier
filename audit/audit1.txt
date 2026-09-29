@@ -1,0 +1,22 @@
+AUDIT 1 — SECURITE (configuration Django + code)
+=================================================
+Outil : bandit sur les apps (comptes, produits, ventes, administration, frontend, scannier).
+Resultat : 0 issue (Low/Medium/High) sur l'ensemble des passes (bandit_step1..6, bandit_final).
+Rapports detaillees dans ce dossier : bandit_step*.txt, bandit_audit.txt, bandit_final.txt.
+
+Points deja en place (a confirmer en production) :
+- SECRET_KEY via variable d'environnement (scannier/settings.py), pas de fallback en clair.
+- Authentification JWT (djangorestframework-simplejwt) activee dans DEFAULT_AUTHENTICATION_CLASSES.
+- Throttling DRF active (AnonRateThrottle / UserRateThrottle).
+- Middleware anti-tampering (administration/middleware.py) : bloque les superusers sur l'API et
+  verifie le scope marchand.
+- Endpoint /api/health/ pour le monitoring.
+- CORS configure via django-cors-headers.
+
+A CORRIGER / VERIFIER avant mise en production :
+1. DEBUG : s'assurer qu'il est a False en production (probablement True en dev).
+2. ALLOWED_HOSTS : restreindre aux noms d'hote reel du deploiement (pas ['*']).
+3. CORS : verifier que CORSAllowedOrigins est limite au/aux domaines front (pas '*').
+4. SECRET_KEY / FRONTEND_USE_MOCK : fournir via variables d'env en prod (jamais en clair dans le depot).
+5. HTTPS / HSTS : activer en production (SECURE_SSL_REDIRECT, HSTS).
+6. Aucune cle/secret ne doit etre committe (verifier .env.example seulement).

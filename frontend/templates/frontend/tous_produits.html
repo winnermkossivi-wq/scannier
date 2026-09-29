@@ -1,0 +1,32 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}Tous les produits - Scannier{% endblock %}
+{% block content %}
+<div class="card w-full bg-base-100 shadow-md rounded-2xl animate-fade-in">
+    <div class="card-body">
+        <h1 class="card-title text-xl sm:text-2xl">Tous les produits</h1>
+        <p class="msg info">Vue patron / superuser : ensemble des produits de la boutique (toutes les boutiques pour un superuser), avec le nom de l'employé créateur.</p>
+        
+        <div class="flex flex-col sm:flex-row gap-2 mb-4">
+            <input type="number" id="bulk-qty" value="1" min="1" max="100" title="Nombre d'exemplaires" class="input input-bordered rounded-xl w-full sm:w-32">
+            <button id="bulk-print" class="btn btn-primary rounded-xl flex-1 hover:scale-105 active:scale-95 transition-transform duration-150 py-3">Imprimer tous les codes-barres (PDF)</button>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr><th>Produit</th><th>Prix</th><th>Code-barres</th><th>Créé par</th><th>Boutique</th><th>Ex.</th><th>Étiquette</th><th>Suppr.</th></tr>
+                </thead>
+                <tbody id="tous-body">
+                    <tr><td colspan="8" class="opacity-60 text-center py-4">Chargement…</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="msg" class="msg hidden"></div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'frontend/js/JsBarcode.all.min.js' %}"></script>
+<script src="{% static 'frontend/js/tous_produits.js' %}?v=20260906"></script>
+{% endblock %}

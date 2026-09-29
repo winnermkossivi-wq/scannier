@@ -1,0 +1,18 @@
+AUDIT 2 — CONTRAT API & CORRECTIONS APPORTEES
+=============================================
+Le frontend etait code contre des endpoints "mock" ; le backend reel differe. Corrections faites
+cote frontend pour se brancher sur l'API reelle (verifiees par test d'integration test_api.py).
+
+Endpoint                      | Attente (mock)              | Reel (backend)                              | Statut
+------------------------------|-----------------------------|---------------------------------------------|--------
+POST /api/comptes/login/      | {token} + role dans body    | {access, refresh} (simplejwt) ; role = claim JWT | CORRIGE (login.js)
+GET  /api/produits/catalogue-sync/ | liste [...]           | dict {produits:[...], marchand, timestamp}  | CORRIGE (api.js : lit .produits)
+GET  /api/produits/<id>/qr/   | /produits/<id_qr>/qrcode/   | <id> = PK produit ; {qr_base64_png}         | CORRIGE (produits.js)
+POST /api/ventes/             | /ventes/creer/              | /ventes/ -> {id}                            | CORRIGE (vente.js)
+POST /api/ventes/<id>/lignes/ | /ventes/<id>/ajouter-ligne/ | body {id_qr, quantite}                     | CORRIGE (vente.js)
+POST /api/ventes/<id>/finaliser/ | /ventes/<id>/finaliser/ | statut=finalisee + hash_preuve              | CORRIGE (vente.js)
+POST /api/ventes/<id>/annuler/   | idem                     | ok                                          | CORRIGE (vente.js)
+GET  /api/ventes/             | /ventes/historique/         | liste de ventes avec champ "lignes" (array) | CORRIGE (historique.js : utilise .lignes)
+POST /api/ventes/sync/        | non prevu                   | body {ventes:[{id_local, lignes:[{id_qr,quantite}]}]} -> {resultats:[...], doublons_ignores} | IMPLEMENTE (sync.js)
+
+AUCUN changement de modele n'a ete fait (apps comptes/produits/ventes appartiennent a d'autres agents).

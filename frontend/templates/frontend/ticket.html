@@ -1,0 +1,20 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}Ticket - Scannier{% endblock %}
+{% block content %}
+<div class="card w-full max-w-md mx-auto bg-base-100 shadow-md rounded-2xl animate-fade-in">
+    <div class="card-body">
+        <div id="ticket-zone"></div>
+        <div id="empty" class="msg info hidden">Aucun ticket à afficher. Finalisez une vente pour générer un ticket.</div>
+        <div class="no-print flex flex-col sm:flex-row gap-2 mt-4">
+            <button onclick="window.print()" class="btn btn-primary rounded-xl flex-1 hover:scale-105 active:scale-95 transition-transform duration-150 py-3">Imprimer le ticket</button>
+            <button id="bt-print" class="btn btn-secondary rounded-xl flex-1 hover:scale-105 active:scale-95 transition-transform duration-150 py-3">Imprimer (Bluetooth)</button>
+            <button class="btn bg-violet-600 hover:bg-violet-700 text-white border-violet-600 rounded-full flex-1 shadow-md" onclick="window.location.href='/vente/nouvelle/'"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Nouvelle vente</button>
+            <button class="btn btn-ghost rounded-xl flex-1" onclick="window.location.href='/historique/'">Historique</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'frontend/js/ticket.js' %}?v=20260905"></script>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>body{font-family:'Inter',sans-serif}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.shake{animation:shake .35s}
+</style>
+</head>
+<body class="bg-[#2563eb] min-h-screen overflow-hidden" x-data="{ showCard:false, tab:'in', emailError:false }" x-init="setTimeout(()=>showCard=true, 1500)">
+
+<div class="fixed inset-0 bg-white flex flex-col items-center justify-start pt-10 lg:justify-center lg:pt-0" :class="showCard ? 'blur-sm brightness-90' : ''" style="transition: all .6s">
+  <h1 class="text-gray-900 text-[42px] font-extrabold tracking-tighter mt-2 lg:mt-0">SCANNiER</h1>
+  <img src="{% static 'frontend/images/img1/image-copy.png' %}" class="w-64 h-64 object-contain object-center mt-3 lg:mt-4" style="animation: float 3s ease-in-out infinite; transition: transform 1.2s cubic-bezier(.16,1,.3,1);" :style="showCard ? '' : 'transform:scale(0.7)'" x-init="$el.style.transform='scale(1)'">
+</div>
+
+<div class="fixed inset-0 bg-white lg:rounded-none rounded-none p-6 lg:p-8 shadow-2xl flex flex-col overflow-y-auto"
+     x-show="showCard" x-transition:enter="transition duration-[600ms] ease-[cubic-bezier(0.68,-0.55,0.265,1.55)]" x-transition:enter-start="translate-y-full lg:translate-y-0 lg:scale-95 lg:opacity-0" x-transition:enter-end="translate-y-0 lg:scale-100 lg:opacity-100">
+
+  <div class="bg-[#f5f5f5] rounded-full p-1 flex relative w-fit mx-auto">
+    <div class="absolute top-1 bottom-1 w-[50%] bg-[#2563eb] rounded-full transition-all duration-300" :class="tab==='in' ? 'left-1' : 'left-[50%] -ml-1'"></div>
+    <button @click="tab='in'" type="button" class="relative z-10 px-6 py-2 text-sm rounded-full transition" :class="tab==='in' ? 'text-white' : 'text-gray-500'">Sign in</button>
+    <button @click="tab='up'" type="button" class="relative z-10 px-6 py-2 text-sm rounded-full transition" :class="tab==='up' ? 'text-white' : 'text-gray-500'">Sign up</button>
+  </div>
+
+  <!-- SIGN IN : 2 inputs + rôle -->
+  <div x-show="tab==='in'" x-transition>
+    <form id="login-form" class="mt-6 space-y-3 flex flex-col lg:items-center">
+      {% csrf_token %}
+      <div id="msg" class="hidden w-full lg:max-w-[340px]"></div>
+      <input id="username" name="username" placeholder="Nom d'utilisateur" required
+             class="w-full lg:max-w-[340px] bg-[#f5f5f5] border border-transparent rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-[#2563eb] focus:outline-none transition-colors duration-200">
+      <input id="password" type="password" name="password" placeholder="Mot de passe" required
+             class="w-full lg:max-w-[340px] bg-[#f5f5f5] border border-transparent rounded-xl px-4 py-3 text-sm focus:border-[#2563eb] focus:bg-white focus:outline-none transition-colors duration-200">
+      <select id="role" name="role" class="w-full lg:max-w-[340px] bg-[#f5f5f5] border border-transparent rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-[#2563eb] focus:outline-none">
+        <option value="employe">Employé</option>
+        <option value="patron">Patron</option>
+      </select>
+      <button type="submit" class="group w-full lg:max-w-[340px] bg-[#2563eb] text-white rounded-full py-3.5 font-semibold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-sm">
+        Se connecter <span class="group-hover:translate-x-1 transition-transform">→</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- SIGN UP : Création compte (4 inputs) - Même style que Sign In -->
+  <div x-show="tab==='up'" x-transition>
+    <form method="post" action="{% url 'frontend:register' %}" class="mt-6 space-y-3 flex flex-col lg:items-center">
+      {% csrf_token %}
+      <div id="msg" class="hidden w-full lg:max-w-[340px]"></div>
+      <input type="text" name="username" placeholder="Nom d'utilisateur" required
+             class="w-full lg:max-w-[340px] bg-[#f5f5f5] border border-transparent rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-[#2563eb] focus:outline-none transition-colors duration-200" autocomplete="username">
+      <input type="text" name="nom_boutique" placeholder="Nom de la boutique" required
+             class="w-full lg:max-w-[340px] bg-[#f5f5f5] border border-transparent rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-[#2563eb] focus:outline-none transition-colors duration-200" autocomplete="off">
+      <input type="password" name="password" placeholder="Mot de passe" required minlength="6"
+             class="w-full lg:max-w-[340px] bg-[#f5f5f5] border border-transparent rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-[#2563eb] focus:outline-none transition-colors duration-200" autocomplete="new-password">
+      <input type="password" name="password2" placeholder="Confirmer le mot de passe" required
+             class="w-full lg:max-w-[340px] bg-[#f5f5f5] border border-transparent rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-[#2563eb] focus:outline-none transition-colors duration-200" autocomplete="new-password">
+      <button type="submit" class="group w-full lg:max-w-[340px] bg-[#2563eb] text-white rounded-full py-3.5 font-semibold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-sm">
+        Créer mon compte <span class="group-hover:translate-x-1 transition-transform">→</span>
+      </button>
+    </form>
+  </div>
+
+</div>
+
+<script>
+  window.USE_MOCK = false;
+  window.API_BASE = "/api";
+</script>
+<script src="{% static 'frontend/js/storage.js' %}?v=20260905"></script>
+<script src="{% static 'frontend/js/mock.js' %}?v=20260905"></script>
+<script src="{% static 'frontend/js/api.js' %}?v=20260905b"></script>
+<script src="{% static 'frontend/js/login.js' %}?v=20260905"></script>
+</body>
+</html>

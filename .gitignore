@@ -1,0 +1,70 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node / Capacitor
+node_modules/
+android/.gradle/
+android/local.properties
+android/app/build/
+android/app/.cxx/
+
+# Coverage / test
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Security - never commit secrets
+*.pem
+*.key
+*.crt
+secrets/
+
+# Audit / reports
+bandit_report.json
+
+# Static files (generated)
+staticfiles/
+
+# Capacitor build output
+www/
+
+# PWA service worker cache
+sw-cache/
+
+# Logs
+*.log
+logs/

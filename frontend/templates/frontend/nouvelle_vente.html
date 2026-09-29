@@ -1,0 +1,159 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}Nouvelle vente - Scannier{% endblock %}
+{% block content %}
+<div class="card w-full bg-base-100 shadow-md rounded-2xl animate-fade-in">
+    <div class="card-body">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+            <h1 class="card-title text-xl sm:text-2xl">Nouvelle vente</h1>
+            <button class="btn bg-violet-600 hover:bg-violet-700 text-white border-violet-600 btn-sm rounded-full shadow-md" id="reset-btn"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Nouvelle vente</button>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-2 mb-4 relative">
+            <button id="scan-camera"
+                    class="btn btn-primary rounded-xl flex-1 hover:scale-105 active:scale-95 transition-transform duration-150 py-3 relative overflow-visible"
+                    aria-label="Scanner avec la caméra">
+                <svg class="w-5 h-5 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 3a2 2 0 00-2 2v2M17 3a2 2 0 012 2v2M7 21a2 2 0 01-2-2v-2M17 21a2 2 0 002-2v-2M10 9v6M12 9v6M14 9v6M8 12h8"/></svg>
+                <span>Scanner (caméra)</span>
+                <span id="scan-badge" class="scan-badge hidden">0</span>
+            </button>
+            <button id="scan-photo-fallback"
+                    class="btn btn-secondary rounded-xl flex-1 hover:scale-105 active:scale-95 transition-transform duration-150 py-3"
+                    aria-label="Scanner par photo (fallback)">
+                <svg class="w-5 h-5 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Photo
+            </button>
+            <input type="file" id="scan-photo-input" accept="image/*" capture="environment" class="hidden">
+        </div>
+
+        <div id="reader" class="hidden"></div>
+
+        <!-- Toast container -->
+        <div id="toast-container" class="fixed bottom-20 right-4 left-4 sm:left-auto sm:right-4 z-50 flex flex-col gap-2 items-end"></div>
+
+        <button id="toggle-manual" class="btn btn-ghost bg-base-200 hover:bg-base-300 rounded-full w-full mt-2 flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0l-.828-.828a2 2 0 010-2.828l8-8z"/></svg>
+            Saisie manuelle
+            <svg id="manual-chevron" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+
+        <!-- Bouton rond unique pour Lignes scannées (téléphone) - caché, tableau visible comme PC -->
+        <button id="toggle-lignes" class="hidden"></button>
+        <!-- Tableau visible partout comme PC -->
+        <div class="block mt-4">
+            <h2 class="text-lg font-bold">Lignes scannées</h2>
+            <div class="table-responsive lines-scroll">
+                <table class="table table-zebra w-full">
+                    <thead>
+                        <tr><th>Produit</th><th>Prix unit.</th><th>Qté</th><th>Sous-total</th></tr>
+                    </thead>
+                    <tbody id="lines-body-desktop">
+                        <tr><td colspan="4" class="opacity-60 text-center py-4">Aucune ligne pour le moment.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Version téléphone : caché, ouvre bottom sheet -->
+        <div class="hidden">
+            <div class="table-responsive lines-scroll">
+                <table class="table table-zebra w-full">
+                    <thead>
+                        <tr><th>Produit</th><th>Qté</th><th>Sous-total</th></tr>
+                    </thead>
+                    <tbody id="lines-body">
+                        <tr><td colspan="3" class="opacity-60 text-center py-4">Aucune ligne pour le moment.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="action-bar no-print pb-2 md:pb-0" style="margin-bottom: env(safe-area-inset-bottom);">
+            <div class="total-box">Total : <span id="total">0.00</span> FCFA</div>
+            <div class="flex flex-col sm:flex-row gap-2">
+                <button id="finalize-btn"
+                        class="btn btn-primary btn-lg flex-1 hover:scale-105 active:scale-95 transition-transform duration-150 py-4 text-lg">
+                    Finaliser la vente
+                </button>
+                <button id="cancel-btn"
+                        class="btn btn-secondary hover:scale-105 active:scale-95 transition-transform duration-150 py-4 text-lg flex-1">
+                    Annuler
+                </button>
+            </div>
+        </div>
+        <div id="stock-warn" class="stock-warn hidden"></div>
+        <div id="msg" class="msg hidden"></div>
+    </div>
+</div>
+
+<!-- Modal Saisie manuelle (comme Ajouter employé) -->
+<div id="modal-manual" class="fixed inset-0 z-50 hidden">
+    <div id="modal-manual-backdrop" class="absolute inset-0 bg-black/50"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-base-100 rounded-2xl shadow-xl w-full max-w-md p-6 relative animate-fade-in">
+            <h3 class="font-bold text-lg mb-1">Saisie manuelle</h3>
+            <p class="text-sm opacity-70 mb-4">Si la caméra ne fonctionne pas, saisissez le code-barres du produit.</p>
+            <div class="space-y-3">
+                <input type="text" id="manual-id" placeholder="Ex: 1234567890128" class="input input-bordered rounded-xl w-full">
+                <div class="flex gap-2 items-center">
+                    <input type="number" id="manual-qte" value="1" min="1" class="input input-bordered rounded-xl flex-1">
+                    <button id="manual-add" class="btn btn-secondary rounded-full flex-1 hover:scale-105 active:scale-95">Ajouter</button>
+                </div>
+            </div>
+            <button id="modal-manual-close" class="btn btn-ghost btn-sm btn-circle absolute right-2 top-2" aria-label="Fermer">✕</button>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom sheet Lignes scannées (téléphone) -->
+<div id="modal-lignes" class="fixed inset-0 z-50 hidden">
+    <div id="modal-lignes-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="absolute bottom-0 left-0 right-0 bg-base-100 rounded-t-3xl shadow-2xl p-4 pb-8 safe-bottom max-h-[65vh] overflow-y-auto">
+        <div class="w-12 h-1.5 bg-base-300 rounded-full mx-auto mb-4"></div>
+        <h3 class="font-bold text-lg mb-3 flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg> Lignes scannées</h3>
+        <div class="table-responsive">
+            <table class="table table-zebra w-full">
+                <thead><tr><th>Produit</th><th>Qté</th><th>Sous-total</th></tr></thead>
+                <tbody id="lines-body-sheet"><tr><td colspan="3" class="opacity-60 text-center py-4">Aucune ligne pour le moment.</td></tr></tbody>
+            </table>
+        </div>
+        <button id="modal-lignes-close" class="btn btn-ghost rounded-full w-full mt-4">Fermer</button>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'frontend/js/html5-qrcode.min.js' %}?v=20260905"></script>
+<script src="{% static 'frontend/js/JsBarcode.all.min.js' %}"></script>
+<script src="{% static 'frontend/js/vente.js' %}?v=20260923"></script>
+<script>
+(function(){
+  const btn=document.getElementById('toggle-manual');
+  const modal=document.getElementById('modal-manual');
+  const backdrop=document.getElementById('modal-manual-backdrop');
+  const closeBtn=document.getElementById('modal-manual-close');
+  const chev=document.getElementById('manual-chevron');
+  function open(){ if(modal) modal.classList.remove('hidden'); if(chev) chev.classList.add('rotate-180'); document.body.style.overflow='hidden'; }
+  function close(){ if(modal) modal.classList.add('hidden'); if(chev) chev.classList.remove('rotate-180'); document.body.style.overflow=''; }
+  if(btn&&modal){
+    btn.addEventListener('click', open);
+    if(backdrop) backdrop.addEventListener('click', close);
+    if(closeBtn) closeBtn.addEventListener('click', close);
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape' && modal && !modal.classList.contains('hidden')) close(); });
+    const addBtn=document.getElementById('manual-add');
+    if(addBtn) addBtn.addEventListener('click', function(){ setTimeout(close, 400); });
+  }
+  // Lignes scannées bottom sheet (téléphone)
+  const tBtn=document.getElementById('toggle-lignes');
+  const lModal=document.getElementById('modal-lignes');
+  const lBack=document.getElementById('modal-lignes-backdrop');
+  const lClose=document.getElementById('modal-lignes-close');
+  function lOpen(){ if(lModal) lModal.classList.remove('hidden'); document.body.style.overflow='hidden'; }
+  function lCloseFn(){ if(lModal) lModal.classList.add('hidden'); document.body.style.overflow=''; }
+  if(tBtn&&lModal){
+    tBtn.addEventListener('click', lOpen);
+    if(lBack) lBack.addEventListener('click', lCloseFn);
+    if(lClose) lClose.addEventListener('click', lCloseFn);
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape' && lModal && !lModal.classList.contains('hidden')) lCloseFn(); });
+  }
+})();
+</script>
+{% endblock %}

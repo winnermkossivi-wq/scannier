@@ -1,0 +1,25 @@
+AUDIT 4 — FRONTEND : limites & points a corriger
+================================================
+Contexte : frontend repris d'un agent abandonne, re-cablé sur l'API reelle.
+
+1. addProduit : uniquement local (IndexedDB), pas de persistance serveur.
+   Depend de AUDIT 3 #2 (ajout endpoint produits).
+
+2. Repli mock sur 404 dans api.js :
+   `if (!r.ok && r.status === 404 && window.MockAPI) return MockAPI(...)`
+   -> Peut masquer une mauvaise URL d'endpoint en prod. A desactiver quand USE_MOCK=False,
+      ou ne replier que si USE_MOCK=True.
+
+3. Flux hors-ligne : câblé (IndexedDB + sync.js) mais NON teste en navigateur reel ici.
+   A tester manuellement : se connecter -> couper le reseau (DevTools/Offline) -> scanner/creer une
+   vente -> remettre le reseau -> une banniere "X vente(s) synchronisee(s)" doit apparaitre.
+
+4. Web Bluetooth non supporte sur iOS Safari :
+   -> Le build mobile doit utiliser le pont Capacitor (deja marque dans bluetooth.js :
+      window.Capacitor.Plugins.EscPosPrinter). A implementer cote natif.
+
+5. Impression thermique ESC/POS : octets generes cote frontend (bluetooth.js).
+   -> A valider sur une vraie imprimante (coupes, largeurs, encodage CP850 pour les accents).
+
+6. [INFO] FRONTEND_USE_MOCK = False par defaut (scannier/settings.py) -> le frontend appelle
+   maintenant la vraie API.

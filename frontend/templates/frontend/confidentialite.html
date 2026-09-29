@@ -1,0 +1,86 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}Politique de confidentialité - Scannier{% endblock %}
+{% block content %}
+<div class="card w-full bg-base-100 shadow-md rounded-2xl animate-fade-in">
+    <div class="card-body">
+        <h1 class="card-title text-xl sm:text-2xl mb-6">Politique de confidentialité</h1>
+        <p class="text-sm opacity-70 mb-6">Dernière mise à jour : 23 septembre 2026</p>
+
+        <section class="mb-6">
+            <h2 class="text-lg font-bold mb-2">1. Responsable du traitement</h2>
+            <p class="text-sm">Scannier, caisse POS pour supermarchés. Contact : <a href="mailto:contact@scannier.app" class="text-primary underline">contact@scannier.app</a></p>
+        </section>
+
+        <section class="mb-6">
+            <h2 class="text-lg font-bold mb-2">2. Données collectées</h2>
+            <ul class="list-disc list-inside text-sm space-y-1">
+                <li><strong>Compte :</strong> nom d'utilisateur, email, mot de passe hashé, rôle (patron/employé), nom de la boutique.</li>
+                <li><strong>Produits :</strong> nom, code-barres, prix, stock, catégorie (données métier saisies par le marchand).</li>
+                <li><strong>Ventes :</strong> lignes de vente (produit, quantité, prix), montant total, horodatage, identifiant unique de preuve.</li>
+                <li><strong>Techniques :</strong> token JWT (stocké localement), logs d'erreurs anonymisés, version de l'application.</li>
+            </ul>
+        </section>
+
+        <section class="mb-6">
+            <h2 class="text-lg font-bold mb-2">3. Finalités</h2>
+            <ul class="list-disc list-inside text-sm space-y-1">
+                <li>Authentification et autorisation (rôle patron/employé).</li>
+                <li>Gestion du catalogue produits et du stock.</li>
+                <li>Enregistrement et consultation des ventes (historique, ticket, synchronisation hors-ligne).</li>
+                <li>Calcul du hash de preuve d'intégrité des ventes.</li>
+                <li>Alertes de stock (seuil, rupture).</li>
+            </ul>
+        </section>
+
+        <section class="mb-6">
+            <h2 class="text-lg font-bold mb-2">4. Stockage et sécurité</h2>
+            <ul class="list-disc list-inside text-sm space-y-1">
+                <li>Données serveur : base de données PostgreSQL (Django), migrations versionnées.</li>
+                <li>Données client : IndexedDB (catalogue, ventes en attente de sync), localStorage (JWT, préférences).</li>
+                <li>Mots de passe : hashés avec PBKDF2 (Django par défaut).</li>
+                <li>Transport : HTTPS en production ; JWT en header Authorization.</li>
+                <li>Accès : RLS (Row Level Security) par marchand ; un marchand ne voit que ses données.</li>
+            </ul>
+        </section>
+
+        <section class="mb-6">
+            <h2 class="text-lg font-bold mb-2">5. Partage des données</h2>
+            <p class="text-sm">Aucune donnée n'est vendue, louée ou partagée avec des tiers. Les données restent propriété exclusive du marchand.</p>
+        </section>
+
+        <section class="mb-6">
+            <h2 class="text-lg font-bold mb-2">6. Conservation</h2>
+            <ul class="list-disc list-inside text-sm space-y-1">
+                <li>Compte : tant que le compte est actif (suppression sur demande).</li>
+                <li>Ventes : conservation illimitée (obligations comptables/fiscales).</li>
+                <li>Cache navigateur : 7 jours (SW), nettoyage automatique.</li>
+            </ul>
+        </section>
+
+        <section class="mb-6">
+            <h2 class="text-lg font-bold mb-2">7. Vos droits (RGPD)</h2>
+            <ul class="list-disc list-inside text-sm space-y-1">
+                <li>Accès, rectification, effacement, portabilité, limitation, opposition.</li>
+                <li>Retrait du consentement (le cas échéant).</li>
+                <li>Exercice : email à <a href="mailto:contact@scannier.app" class="text-primary underline">contact@scannier.app</a> avec preuve d'identité.</li>
+                <li>Réclamation CNIL possible.</li>
+            </ul>
+        </section>
+
+        <section class="mb-6">
+            <h2 class="text-lg font-bold mb-2">8. Cookies et traceurs</h2>
+            <p class="text-sm">Aucun cookie tiers, aucune publicité, aucun tracking analytique. Seul un cookie de session technique (JWT en localStorage, pas en cookie) est utilisé pour l'authentification.</p>
+        </section>
+
+        <section class="mb-6">
+            <h2 class="text-lg font-bold mb-2">9. Modifications</h2>
+            <p class="text-sm">Cette politique peut évoluer. La version datée ci-dessus fait foi. Continuer à utiliser l'application vaut acceptation.</p>
+        </section>
+
+        <div class="mt-8 pt-4 border-t border-base-300">
+            <a href="{% url 'frontend:tableau_de_bord' %}" class="btn btn-primary rounded-xl">Retour à l'accueil</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

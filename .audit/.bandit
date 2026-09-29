@@ -1,0 +1,7 @@
+bandit:
+  exclude:
+    - "*/migrations/*"
+    - "*/__pycache__/*"
+    - "*/static/*"
+    - "*/tests*.py"
+    - "test_api.py"

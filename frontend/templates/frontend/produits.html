@@ -1,0 +1,109 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}Mes produits - Scannier{% endblock %}
+{% block content %}
+<div class="card w-full bg-base-100 shadow-md rounded-2xl animate-fade-in">
+    <div class="card-body">
+        <h1 class="card-title text-xl sm:text-2xl">Mes produits</h1>
+        <p class="text-sm opacity-70">Chaque produit possède un code-barres à imprimer et coller sur l'article physique.</p>
+
+        <h2 class="text-lg font-bold mt-4">Ajouter un produit</h2>
+        <div class="flex flex-col sm:flex-row gap-2 mb-4">
+            <button id="mode-ref" class="btn btn-primary rounded-xl flex-1 hover:scale-105 active:scale-95 transition-transform duration-150 py-3">Ajouter produits</button>
+            <button id="mode-libre" class="btn btn-secondary rounded-xl flex-1 hover:scale-105 active:scale-95 transition-transform duration-150 py-3">Generer produits</button>
+        </div>
+
+        <div id="msg" class="msg hidden"></div>
+    </div>
+</div>
+
+<!-- Modal Ajouter produits (comme Ajouter employé) -->
+<div id="modal-ajouter" class="fixed inset-0 z-50 hidden">
+    <div id="modal-ajouter-backdrop" class="absolute inset-0 bg-black/50"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-base-100 rounded-2xl shadow-xl w-full max-w-md p-6 relative animate-fade-in max-h-[90vh] overflow-y-auto">
+            <h3 class="font-bold text-lg mb-4">Ajouter produits</h3>
+            <label class="label" for="ref-select"><span class="label-text">Modèle de référence</span></label>
+            <select id="ref-select" class="select select-bordered rounded-xl w-full"></select>
+            <div class="form-control mt-3">
+                <label class="label cursor-pointer justify-start gap-2">
+                    <input type="checkbox" id="suivre-stock-ref" class="checkbox checkbox-primary">
+                    <span class="label-text">Suivre le stock</span>
+                </label>
+                <div id="stock-fields-ref" class="hidden mt-2 grid grid-cols-1 gap-2">
+                    <div>
+                        <label class="label" for="stock-qte-ref"><span class="label-text">Quantité en stock</span></label>
+                        <input type="number" id="stock-qte-ref" min="0" value="0" class="input input-bordered rounded-xl w-full">
+                    </div>
+                    <div>
+                        <label class="label" for="stock-seuil-ref"><span class="label-text">Seuil d'alerte</span></label>
+                        <input type="number" id="stock-seuil-ref" min="0" placeholder="Ex: 5" class="input input-bordered rounded-xl w-full">
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 flex gap-2">
+                <button id="modal-ajouter-close" class="btn btn-ghost rounded-full flex-1">Annuler</button>
+                <button id="add-ref" class="btn btn-primary rounded-full flex-1">Ajouter ce modèle</button>
+            </div>
+            <button id="modal-ajouter-x" class="btn btn-ghost btn-sm btn-circle absolute right-2 top-2">✕</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Generer produits (comme Saisie manuelle) -->
+<div id="modal-generer" class="fixed inset-0 z-50 hidden">
+    <div id="modal-generer-backdrop" class="absolute inset-0 bg-black/50"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-base-100 rounded-2xl shadow-xl w-full max-w-md p-6 relative animate-fade-in max-h-[90vh] overflow-y-auto">
+            <h3 class="font-bold text-lg mb-4">Generer produits</h3>
+            <div class="space-y-3">
+                <div>
+                    <label class="label" for="lib-nom"><span class="label-text">Nom du produit</span></label>
+                    <input type="text" id="lib-nom" placeholder="Ex: Tomates 1kg" class="input input-bordered rounded-xl w-full">
+                </div>
+                <div>
+                    <label class="label" for="lib-prix"><span class="label-text">Prix (FCFA)</span></label>
+                    <input type="number" id="lib-prix" placeholder="Ex: 500" min="0" step="0.01" class="input input-bordered rounded-xl w-full">
+                </div>
+                <div>
+                    <label class="label" for="lib-id"><span class="label-text">Code-barres (optionnel)</span></label>
+                    <input type="text" id="lib-id" placeholder="Laissé vide = auto (EAN-13)" class="input input-bordered rounded-xl w-full">
+                </div>
+                <div class="form-control">
+                    <label class="label cursor-pointer justify-start gap-2">
+                        <input type="checkbox" id="suivre-stock" class="checkbox checkbox-primary">
+                        <span class="label-text">Suivre le stock</span>
+                    </label>
+                    <div id="stock-fields" class="hidden mt-2 grid grid-cols-1 gap-2">
+                        <div>
+                            <label class="label" for="stock-qte"><span class="label-text">Quantité en stock</span></label>
+                            <input type="number" id="stock-qte" min="0" value="0" class="input input-bordered rounded-xl w-full">
+                        </div>
+                        <div>
+                            <label class="label" for="stock-seuil"><span class="label-text">Seuil d'alerte</span></label>
+                            <input type="number" id="stock-seuil" min="0" placeholder="Ex: 5" class="input input-bordered rounded-xl w-full">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 flex gap-2">
+                <button id="modal-generer-close" class="btn btn-ghost rounded-full flex-1">Annuler</button>
+                <button id="add-libre" class="btn btn-primary rounded-full flex-1">Créer le produit</button>
+            </div>
+            <button id="modal-generer-x" class="btn btn-ghost btn-sm btn-circle absolute right-2 top-2">✕</button>
+        </div>
+    </div>
+</div>
+
+<div class="card w-full bg-base-100 shadow-md rounded-2xl mt-4 animate-fade-in">
+    <div class="card-body">
+        <h2 class="card-title text-lg sm:text-xl">Produits du marchand</h2>
+        <p class="text-sm opacity-70">Saisissez le nombre d'exemplaires à imprimer, puis cliquez sur « Imprimer (PDF) » pour générer les étiquettes code-barres (ou « Aperçu » pour une étiquette à l'écran).</p>
+        <div id="product-grid" class="product-grid"></div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'frontend/js/JsBarcode.all.min.js' %}"></script>
+<script src="{% static 'frontend/js/produits.js' %}?v=20260906"></script>
+{% endblock %}

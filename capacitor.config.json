@@ -1,0 +1,24 @@
+{
+  "appId": "app.scannier.caisse",
+  "appName": "Scannier",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "android": {
+    "buildOptions": {
+      "keystorePath": null,
+      "keystoreAlias": null
+    },
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "Camera": {
+      "permissions": ["camera"]
+    },
+    "BluetoothSerial": {
+      "permissions": ["bluetooth", "bluetooth_admin"]
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>body{font-family:'Inter',sans-serif}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.shake{animation:shake .35s}
+</style>
+</head>
+<body class="bg-[#2563eb] min-h-screen overflow-hidden" x-data="{ showCard:false, tab:'in', emailError:false }" x-init="setTimeout(()=>showCard=true, 1500)">
+
+<div class="fixed inset-0 bg-[#2563eb] flex flex-col items-center justify-center" :class="showCard ? 'blur-sm brightness-90' : ''" style="transition: all .6s">
+  <h1 class="text-white text-[42px] font-extrabold tracking-tighter">SOLE</h1>
+  <img src="{% static 'frontend/images/img1/image-copy.png' %}" class="w-64 h-64 object-contain object-center mt-4" style="animation: float 3s ease-in-out infinite; transition: transform 1.2s cubic-bezier(.16,1,.3,1);" :style="showCard ? '' : 'transform:scale(0.7)'" x-init="$el.style.transform='scale(1)'">
+</div>
+
+<div class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[32px] h-[70vh] lg:h-[68vh] p-6 lg:p-8 shadow-2xl flex flex-col border-t border-blue-100"
+     x-show="showCard" x-transition:enter="transition duration-[600ms] ease-[cubic-bezier(0.68,-0.55,0.265,1.55)]" x-transition:enter-start="translate-y-full" x-transition:enter-end="translate-y-0">
+
+  <div class="bg-[#f5f5f5] rounded-full p-1 flex relative w-fit mx-auto">
+    <div class="absolute top-1 bottom-1 w-[50%] bg-[#2563eb] rounded-full transition-all duration-300" :class="tab==='in' ? 'left-1' : 'left-[50%] -ml-1'"></div>
+    <button @click="tab='in'" class="relative z-10 px-6 py-2 text-sm rounded-full transition" :class="tab==='in' ? 'text-white' : 'text-gray-500'">Sign in</button>
+    <button @click="tab='up'" class="relative z-10 px-6 py-2 text-sm rounded-full transition" :class="tab==='up' ? 'text-white' : 'text-gray-500'">Sign up</button>
+  </div>
+
+  <h2 class="text-center text-2xl font-bold mt-6 text-gray-900" x-show="showCard" x-transition:enter="transition delay-200 duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">Welcome back</h2>
+
+  <form id="login-form" method="post" class="mt-6 space-y-4 flex-1 flex flex-col">
+    {% csrf_token %}
+    <div id="msg" class="hidden"></div>
+    <input name="username" placeholder="Email" required
+           :class="emailError ? 'shake border-red-400' : 'focus:border-[#2563eb]'"
+           @input="emailError=false"
+           @blur="emailError = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($el.value) && $el.value.length>0"
+           class="w-full bg-[#f5f5f5] border border-transparent rounded-xl px-4 py-3 text-sm focus:bg-white focus:outline-none transition-colors duration-200">
+    <input type="password" name="password" placeholder="Password" required
+           class="w-full bg-[#f5f5f5] border border-transparent rounded-xl px-4 py-3 text-sm focus:border-[#2563eb] focus:bg-white focus:outline-none transition-colors duration-200">
+
+    <button type="submit" class="group w-full bg-[#2563eb] text-white rounded-full py-3.5 font-semibold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-sm">
+      Sign in <span class="group-hover:translate-x-1 transition-transform">→</span>
+    </button>
+    <a href="#" class="text-center text-sm underline decoration-gray-300 hover:decoration-[#2563eb] hover:text-[#2563eb]">Browse as guest</a>
+  </form>
+</div>
+
+<script src="{% static 'frontend/js/login.js' %}?v=20260905"></script>
+</body>
+</html>

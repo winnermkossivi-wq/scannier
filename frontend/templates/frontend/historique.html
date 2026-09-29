@@ -1,0 +1,25 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}Historique - Scannier{% endblock %}
+{% block content %}
+<div class="card w-full bg-base-100 shadow-md rounded-2xl animate-fade-in">
+    <div class="card-body">
+        <h1 class="card-title text-xl sm:text-2xl">Historique des ventes</h1>
+        <div id="role-note" class="msg info"></div>
+        <div class="table-responsive">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr><th>Réf.</th><th>Date / Heure</th><th>Lignes</th><th>Total</th><th>Statut</th></tr>
+                </thead>
+                <tbody id="hist-body">
+                    <tr><td colspan="5" class="opacity-60 text-center py-4">Chargement…</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="msg" class="msg hidden"></div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'frontend/js/historique.js' %}?v=20260905"></script>
+{% endblock %}

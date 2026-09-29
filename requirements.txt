@@ -1,0 +1,29 @@
+# --- Core ---
+Django==6.0.5
+djangorestframework==3.18.0
+
+# --- Authentification / securite ---
+djangorestframework-simplejwt==5.5.1
+django-cors-headers==4.9.0
+python-dotenv==1.2.3
+django-otp==1.7.0
+django-ratelimit==4.1.0
+
+# --- Documentation API (Swagger) ---
+drf-spectacular==0.30.0
+
+# --- Generation de codes-barres / QR (compat) / PDF ---
+qrcode==8.2
+python-barcode==0.16.1
+Pillow==12.3.0
+reportlab==5.0.1
+
+# --- Base de donnees : PostgreSQL (deploy) ---
+dj-database-url==3.1.2
+psycopg2-binary==2.9.12
+
+# --- Outil d'audit securite (developpement) ---
+bandit==1.9.4
+
+# --- Production : service des fichiers statiques ---
+whitenoise==6.9.0

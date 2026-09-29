@@ -1,0 +1,31 @@
+{
+  "name": "scannier",
+  "version": "1.0.0",
+  "description": "Caisse enregistreuse mobile pour marchands ouest-africains",
+  "main": "index.js",
+  "scripts": {
+    "build": "python build_capacitor.py",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android",
+    "cap:run": "npx cap run android",
+    "android": "npm run build && npm run cap:sync"
+  },
+  "keywords": ["pos", "caisse", "mobile", "africa"],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/camera": "^8.2.3",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/device": "^8.2.3",
+    "@capacitor/geolocation": "^8.2.3",
+    "@capacitor/haptics": "^8.2.3",
+    "@capacitor/keyboard": "^8.2.3",
+    "@capacitor/local-notifications": "^8.2.3",
+    "@capacitor/preferences": "^8.2.3",
+    "@capacitor/push-notifications": "^8.2.3",
+    "cordova-plugin-bluetooth-serial": "^0.4.7"
+  }
+}

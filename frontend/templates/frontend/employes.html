@@ -1,0 +1,109 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}Employés - Scannier{% endblock %}
+{% block content %}
+<div class="card w-full bg-base-100 shadow-md rounded-2xl animate-fade-in">
+    <div class="card-body">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+            <h1 class="card-title text-xl sm:text-2xl">Employés</h1>
+            <button id="btn-ajouter-employe" class="btn btn-primary rounded-xl flex-1 hover:scale-105 active:scale-95 transition-transform duration-150 py-3">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Ajouter un employé
+            </button>
+        </div>
+
+        <div id="msg" class="msg hidden"></div>
+
+        <div class="overflow-x-auto">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Rôle</th>
+                        <th>Statut</th>
+                        <th>Ventes</th>
+                        <th>Total vendu</th>
+                        <th>Dernière activité</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="employes-body">
+                    <tr><td colspan="7" class="opacity-60 text-center py-4">Chargement…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajouter employé -->
+<div id="modal-ajouter-employe" class="fixed inset-0 z-50 hidden">
+    <div id="modal-ajouter-employe-backdrop" class="absolute inset-0 bg-black/50"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-base-100 rounded-2xl shadow-xl w-full max-w-md p-6 relative animate-fade-in max-h-[90vh] overflow-y-auto">
+            <h3 class="font-bold text-lg mb-4">Ajouter un employé</h3>
+            <form id="form-ajouter-employe" class="space-y-4">
+                <div>
+                    <label class="label" for="emp-username"><span class="label-text">Nom d'utilisateur</span></label>
+                    <input type="text" id="emp-username" name="username" required class="input input-bordered rounded-xl w-full" placeholder="ex: jean.dupont">
+                </div>
+                <div>
+                    <label class="label" for="emp-email"><span class="label-text">Email (optionnel)</span></label>
+                    <input type="email" id="emp-email" name="email" class="input input-bordered rounded-xl w-full" placeholder="ex: jean@email.com">
+                </div>
+                <div>
+                    <label class="label" for="emp-password"><span class="label-text">Mot de passe</span></label>
+                    <input type="password" id="emp-password" name="password" required minlength="6" class="input input-bordered rounded-xl w-full" placeholder="6 caractères minimum">
+                </div>
+                <div>
+                    <label class="label" for="emp-role"><span class="label-text">Rôle</span></label>
+                    <select id="emp-role" name="role" class="select select-bordered rounded-xl w-full">
+                        <option value="employe">Employé</option>
+                        <option value="patron">Patron</option>
+                    </select>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" id="modal-ajouter-employe-close" class="btn btn-ghost rounded-full flex-1">Annuler</button>
+                    <button type="submit" class="btn btn-primary rounded-full flex-1">Créer l'employé</button>
+                </div>
+            </form>
+            <button id="modal-ajouter-employe-x" class="btn btn-ghost btn-sm btn-circle absolute right-2 top-2" aria-label="Fermer">✕</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Détail employé -->
+<div id="modal-employe-detail" class="fixed inset-0 z-50 hidden">
+    <div id="modal-employe-detail-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-base-100 rounded-2xl shadow-xl w-full max-w-md p-6 relative animate-fade-in max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-lg" id="modal-employe-title">Détail employé</h3>
+                <button id="modal-employe-detail-close" class="btn btn-ghost btn-sm btn-circle" aria-label="Fermer">✕</button>
+            </div>
+            <div id="modal-employe-content" class="space-y-4">
+                <!-- Contenu injecté par JS -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ventes employé -->
+<div id="modal-employe-ventes" class="fixed inset-0 z-50 hidden">
+    <div id="modal-employe-ventes-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-base-100 rounded-2xl shadow-xl w-full max-w-2xl p-6 relative animate-fade-in max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-lg" id="modal-ventes-title">Ventes de l'employé</h3>
+                <button id="modal-employe-ventes-close" class="btn btn-ghost btn-sm btn-circle" aria-label="Fermer">✕</button>
+            </div>
+            <div id="modal-employe-ventes-content" class="space-y-4">
+                <!-- Contenu injecté par JS -->
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'frontend/js/employes.js' %}?v=20260922"></script>
+{% endblock %}

@@ -1,0 +1,26 @@
+AUDIT 3 — BACKEND : bugs & points a corriger
+============================================
+Note : ce frontend etait initialement developpe par un autre agent (abandonne) contre des endpoints
+"mock". Le backend reel a ete produit par d'autres agents. Les points ci-dessous sont a corriger
+cote backend pour fiabiliser le tout.
+
+1. [IMPORTANT] get_employe_authentifie rejette les superusers
+   Fichier : ventes/views.py:30-31
+   "if user.is_superuser: raise PermissionDenied("Ce compte n'a pas de scope marchand.")"
+   Consequence : un patron cree comme superuser Django ne peut PAS utiliser l'API de caisse.
+   A corriger : soit autoriser le role "patron" meme superuser, soit creer les marchands comme
+   Employe NON-superuser (role patron) via l'admin. Decision requise.
+
+2. [LIMITE] Aucun endpoint de creation/modification de produit
+   produits/urls.py ne contient que : catalogue, <id>/qr/, catalogue-sync.
+   -> La page "Mes produits" ne peut qu'ajouter des produits en local (IndexedDB), sans persistance
+      serveur. A ajouter : POST /api/produits/ (reserve au role patron) + eventuellement PUT/DELETE.
+
+3. [INFO] Catalogue sync renvoie un dict (et non une liste)
+   -> Le frontend lit data.produits (deja corrige). A documenter pour les futurs consommateurs.
+
+4. [OK] id_local : serializers.CharField(max_length=64) (ventes/serializers.py:39)
+   -> Compatible avec les UUID generes par le frontend (36 caracteres). Pas de bug.
+
+5. [A VERIFIER] Decrementation du stock (quantite_stock) a la vente/finalisation :
+   a confirmer cote backend (aucun endpoint de maj de stock vu).

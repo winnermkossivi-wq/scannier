@@ -1,0 +1,137 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block title %}Inscription - Scannier{% endblock %}
+{% block content %}
+<div class="card w-full bg-base-100 shadow-md rounded-2xl animate-fade-in safe-top safe-bottom">
+    <div class="card-body">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-900">Créer un compte</h1>
+            <p class="text-sm opacity-60 mt-1">Rejoignez Scannier et gérez votre supermarché</p>
+        </div>
+
+        <form method="post" action="{% url 'frontend:register' %}" class="space-y-4">
+            {% csrf_token %}
+            
+            <div class="form-control">
+                <label class="label" for="id_username">
+                    <span class="label-text">Nom d'utilisateur</span>
+                </label>
+                <input type="text" name="username" id="id_username" 
+                       placeholder="ex: moussa" 
+                       class="input input-bordered rounded-xl w-full" 
+                       required autocomplete="username">
+            </div>
+
+            <div class="form-control">
+                <label class="label" for="id_nom_boutique">
+                    <span class="label-text">Nom de la boutique</span>
+                </label>
+                <input type="text" name="nom_boutique" id="id_nom_boutique" 
+                       placeholder="ex: Super Marché Central" 
+                       class="input input-bordered rounded-xl w-full" 
+                       required autocomplete="organization">
+            </div>
+
+            <div class="form-control">
+                <label class="label" for="id_password">
+                    <span class="label-text">Mot de passe</span>
+                </label>
+                <input type="password" name="password" id="id_password" 
+                       placeholder="Minimum 6 caractères" 
+                       class="input input-bordered rounded-xl w-full" 
+                       minlength="6" required autocomplete="new-password">
+            </div>
+
+            <div class="form-control">
+                <label class="label" for="id_password2">
+                    <span class="label-text">Confirmer le mot de passe</span>
+                </label>
+                <input type="password" name="password2" id="id_password2" 
+                       placeholder="Confirmer le mot de passe" 
+                       class="input input-bordered rounded-xl w-full" 
+                       minlength="6" required autocomplete="new-password">
+            </div>
+
+            {% if error %}
+            <div class="msg error">{{ error }}</div>
+            {% endif %}
+
+            <div id="register-msg" class="msg hidden"></div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-full rounded-xl hover:scale-105 active:scale-95 transition-transform duration-150 py-3">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                Créer mon compte
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <p class="text-sm opacity-60">Déjà un compte ?</p>
+            <a href="{% url 'frontend:login' %}" class="btn btn-ghost btn-sm rounded-xl mt-2">
+                Se connecter
+            </a>
+        </div>
+
+        <div class="mt-6 text-center">
+            <a href="{% url 'frontend:confidentialite' %}" class="text-sm text-primary underline hover:no-underline">
+                Politique de confidentialité
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'frontend/js/storage.js' %}?v=20260905"></script>
+<script src="{% static 'frontend/js/mock.js' %}?v=20260905"></script>
+<script src="{% static 'frontend/js/api.js' %}?v=20260905b"></script>
+<script>
+(function() {
+  const form = document.querySelector('form');
+  const msg = document.getElementById('register-msg');
+  function show(text, type) {
+    if (!text) return msg.className = 'msg hidden';
+    msg.textContent = text;
+    msg.className = 'msg ' + (type || 'info');
+  }
+  if (form) {
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const username = document.getElementById('id_username').value.trim();
+      const nom_boutique = document.getElementById('id_nom_boutique').value.trim();
+      const password = document.getElementById('id_password').value;
+      const password2 = document.getElementById('id_password2').value;
+      
+      if (!username || !nom_boutique || !password) {
+        show('Veuillez remplir tous les champs obligatoires.', 'error');
+        return;
+      }
+      if (password !== password2) {
+        show('Les mots de passe ne correspondent pas.', 'error');
+        return;
+      }
+      if (password.length < 6) {
+        show('Le mot de passe doit contenir au moins 6 caractères.', 'error');
+        return;
+      }
+      
+      show('Création en cours…', 'info');
+      try {
+        const r = await Api.request('/comptes/login/', {
+          method: 'POST',
+          body: { username: username, password: password, role: 'patron', nom_boutique: nom_boutique }
+        });
+        if (r.ok && r.data && r.data.access) {
+          Store.setAuth(r.data.access, 'patron', nom_boutique, false);
+          show('Compte créé avec succès !', 'ok');
+          setTimeout(() => window.location.href = '/tableau-de-bord/', 800);
+        } else {
+          const detail = (r.data && r.data.detail) || (r.data && typeof r.data === 'object' ? Object.values(r.data).flat().join(', ') : 'Erreur inconnue');
+          show('Erreur : ' + detail, 'error');
+        }
+      } catch (err) {
+        show('Erreur réseau : ' + err.message, 'error');
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}

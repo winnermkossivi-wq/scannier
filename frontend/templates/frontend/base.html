@@ -1,0 +1,330 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>{% block title %}Scannier{% endblock %}</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{% static 'frontend/manifest.json' %}">
+
+    <!-- Theme colors - Mode clair uniquement -->
+    <meta name="theme-color" content="#2563eb">
+
+    <!-- Modern 2026 color palette meta -->
+    <meta name="color-palette" content="modern-2026">
+
+    <!-- iOS / Safari PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Scannier">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="apple-touch-icon" href="{% static 'frontend/icons/icon-192x192.png' %}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{% static 'frontend/icons/icon-152x152.png' %}">
+    <link rel="apple-touch-icon" sizes="167x167" href="{% static 'frontend/icons/icon-167x167.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'frontend/icons/icon-180x180.png' %}">
+
+    <!-- Icons for other platforms -->
+    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'frontend/icons/icon-192x192.png' %}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{% static 'frontend/icons/icon-512x512.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'frontend/icons/icon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'frontend/icons/icon-16x16.png' %}">
+
+    <!-- Maskable icon for Android -->
+    <link rel="icon" type="image/png" sizes="512x512" href="{% static 'frontend/icons/icon-512x512.png' %}" purpose="maskable">
+
+    <!-- Splash screens for iOS (generated via meta) -->
+    <link rel="apple-touch-startup-image" href="{% static 'frontend/icons/splash-640x1136.png' %}" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)">
+    <link rel="apple-touch-startup-image" href="{% static 'frontend/icons/splash-750x1334.png' %}" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)">
+    <link rel="apple-touch-startup-image" href="{% static 'frontend/icons/splash-1125x2436.png' %}" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)">
+    <link rel="apple-touch-startup-image" href="{% static 'frontend/icons/splash-1242x2688.png' %}" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)">
+    <link rel="apple-touch-startup-image" href="{% static 'frontend/icons/splash-1536x2048.png' %}" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)">
+    <link rel="apple-touch-startup-image" href="{% static 'frontend/icons/splash-1668x2388.png' %}" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)">
+    <link rel="apple-touch-startup-image" href="{% static 'frontend/icons/splash-1668x2520.png' %}" media="(device-width: 834px) and (device-height: 1260px) and (-webkit-device-pixel-ratio: 2)">
+
+    <!-- Tailwind CSS (Play CDN, zero build) + DaisyUI (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="{% static 'frontend/css/style.css' %}?v=20260923">
+
+    <!-- Styles essentiels - charger en dernier -->
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- PWA Install Banner (bottom) -->
+    <div id="pwa-install-banner" class="banner hidden fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-50 animate-fade-in">
+        <div class="flex items-start gap-3 p-4 bg-blue-600 text-white rounded-xl shadow-xl">
+            <div class="flex-1">
+                <div class="font-semibold">Installer Scannier</div>
+                <div class="text-sm opacity-90 mt-1">Accédez plus vite à votre caisse, même hors ligne</div>
+            </div>
+            <div class="flex gap-2 shrink-0">
+                <button id="pwa-dismiss-banner" class="btn btn-ghost btn-sm text-white hover:bg-white/20" aria-label="Ignorer">Ignorer</button>
+                <button id="pwa-install-banner-btn" class="btn btn-primary btn-sm bg-white text-blue-600 hover:bg-blue-50">Installer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SW Update Banner (top) -->
+    <div id="sw-update-banner" class="banner hidden fixed top-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-50 animate-fade-in">
+        <div class="flex items-start gap-3 p-4 bg-blue-600 text-white rounded-xl shadow-xl">
+            <div class="flex-1">
+                <div class="font-semibold">Mise à jour disponible</div>
+                <div class="text-sm opacity-90 mt-1">Une nouvelle version de Scannier est prête</div>
+            </div>
+            <div class="flex gap-2 shrink-0">
+                <button id="sw-dismiss-btn" class="btn btn-ghost btn-sm btn-circle text-white hover:bg-white/20" aria-label="Ignorer">✕</button>
+                <button id="sw-update-btn" class="btn btn-primary btn-sm bg-white text-blue-600 hover:bg-blue-50">Actualiser</button>
+            </div>
+        </div>
+    </div>
+
+    <header class="navbar bg-primary text-primary-content shadow-lg px-4 safe-top sticky top-0 z-30">
+        <div class="navbar-start flex-1 flex items-center gap-1 justify-start">
+            <button id="back-btn" class="btn btn-ghost btn-circle btn-sm md:hidden flex" aria-label="Retour" onclick="if(history.length>1) history.back(); else window.location.href='/tableau-de-bord/'">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <span class="text-xl font-bold normal-case tracking-wide ml-1">Scannier</span>
+        </div>
+        <div class="navbar-end flex items-center gap-2">
+            {% if user.is_authenticated %}
+            <span id="role-badge" class="badge badge-ghost hidden"></span>
+            <span id="online-badge" class="badge badge-sm"></span>
+            <a id="logout-link" href="{% url 'frontend:deconnexion' %}" class="btn btn-ghost btn-sm btn-circle" aria-label="Se déconnecter" title="Se déconnecter">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            </a>
+            {% endif %}
+            <!-- Mobile menu button (hamburger) - ALWAYS visible -->
+            <button id="mobile-menu-btn" class="btn btn-ghost btn-square" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+        </div>
+    </header>
+
+<!-- Mobile sidebar menu (Hamburger) -->
+    <aside id="mobile-menu" class="fixed inset-y-0 left-0 z-50 w-full max-w-xs bg-base-100 shadow-xl transform -translate-x-full transition-transform duration-300 ease-in-out md:hidden" aria-label="Menu mobile">
+        <div class="flex flex-col h-full">
+            <div class="p-4 border-b border-base-300 flex items-center justify-between">
+                <span class="text-xl font-bold normal-case tracking-wide text-gray-900">Scannier</span>
+                <button id="mobile-menu-close" class="btn btn-ghost btn-circle btn-sm" aria-label="Fermer le menu">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+<nav class="flex-1 p-4 space-y-3 overflow-y-auto">
+                <!-- Authenticated menu (shown via JS when JWT present) -->
+                <div id="mobile-menu-authed" class="hidden space-y-3">
+                    <!-- Employés - Patron uniquement -->
+                    <a id="mobile-menu-employes" href="{% url 'frontend:employes' %}" class="btn btn-ghost btn-block justify-start normal-case min-h-[48px] hidden">
+                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        Employés
+                    </a>
+                    <button id="mobile-menu-employes-disabled" class="btn btn-ghost btn-block justify-start normal-case text-base-content/50 min-h-[48px] hidden" disabled>
+                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        Employés (réservé au patron)
+                    </button>
+
+                    <div class="border-t border-base-300 my-2 pt-2 space-y-2">
+                        <a href="{% url 'frontend:confidentialite' %}" class="btn btn-ghost btn-block justify-start normal-case min-h-[48px]">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            Politique de confidentialité
+                        </a>
+                        <a id="logout-link" href="{% url 'frontend:deconnexion' %}" class="btn btn-error btn-block justify-start normal-case min-h-[48px]">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                            Se déconnecter
+                        </a>
+                    </div>
+                </div>
+                <!-- Unauthenticated message -->
+                <div id="mobile-menu-unauthed" class="text-center py-8 text-base-content/60 text-sm">
+                    Veuillez vous connecter pour accéder au menu.
+                </div>
+            </nav>
+        </div>
+    </aside>
+    <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" aria-hidden="true"></div>
+
+    <div id="sync-banner" class="banner hidden"></div>
+
+    <main class="container pb-20 md:pb-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer desktop + tablette -->
+    <footer class="footer hidden md:flex flex-col items-center gap-3 bg-base-200 text-base-content p-6 mt-8 border-t border-base-300">
+        <div class="flex gap-6">
+            <a href="{% url 'frontend:tableau_de_bord' %}" class="flex flex-col items-center gap-1 hover:text-primary transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <span class="text-xs">Accueil</span>
+            </a>
+            <a href="{% url 'frontend:nouvelle_vente' %}" class="flex flex-col items-center gap-1 hover:text-primary transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 3a2 2 0 00-2 2v2M17 3a2 2 0 012 2v2M7 21a2 2 0 01-2-2v-2M17 21a2 2 0 002-2v-2M10 9v6M12 9v6M14 9v6M8 12h8"/></svg>
+                <span class="text-xs">Scanner</span>
+            </a>
+            <a href="{% url 'frontend:produits' %}" class="flex flex-col items-center gap-1 hover:text-primary transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10m0 0l8-4V7"/></svg>
+                <span class="text-xs">Produits</span>
+            </a>
+            <a href="{% url 'frontend:historique' %}" class="flex flex-col items-center gap-1 hover:text-primary transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="text-xs">Historique</span>
+            </a>
+        </div>
+        <div class="text-sm opacity-70 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Scannier © 2026 — Caisse supermarché
+            <a href="{% url 'frontend:confidentialite' %}" class="text-primary underline hover:no-underline ml-2">Confidentialité</a>
+        </div>
+    </footer>
+
+    <!-- Bottom nav mobile (icônes footer) -->
+    <nav class="btm-nav btm-nav-lg md:hidden fixed bottom-0 left-0 right-0 bg-base-100 border-t border-base-300 flex justify-around items-center h-16 z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] safe-bottom">
+        <a href="{% url 'frontend:tableau_de_bord' %}" class="flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-base-content hover:text-primary transition-colors {% if request.path == '/tableau-de-bord/' %}text-primary{% endif %}">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            <span class="text-[10px]">Accueil</span>
+        </a>
+        <a href="{% url 'frontend:nouvelle_vente' %}" class="flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-base-content hover:text-primary transition-colors {% if request.path == '/vente/nouvelle/' %}text-primary{% endif %}">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 3a2 2 0 00-2 2v2M17 3a2 2 0 012 2v2M7 21a2 2 0 01-2-2v-2M17 21a2 2 0 002-2v-2M10 9v6M12 9v6M14 9v6M8 12h8"/></svg>
+            <span class="text-[10px]">Scanner</span>
+        </a>
+        <a href="{% url 'frontend:produits' %}" class="flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-base-content hover:text-primary transition-colors {% if request.path == '/produits/' %}text-primary{% endif %}">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10m0 0l8-4V7"/></svg>
+            <span class="text-[10px]">Produits</span>
+        </a>
+        <a href="{% url 'frontend:historique' %}" class="flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-base-content hover:text-primary transition-colors {% if request.path == '/historique/' %}text-primary{% endif %}">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="text-[10px]">Historique</span>
+        </a>
+    </nav>
+
+    <!-- Product options bottom sheet (mobile app-like, tap → options) -->
+    <div id="product-sheet" class="fixed inset-0 z-50 hidden">
+        <div id="sheet-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+        <div class="absolute bottom-0 left-0 right-0 bg-base-100 rounded-t-3xl shadow-2xl p-4 pb-8 safe-bottom max-h-[75vh] overflow-y-auto">
+            <div class="w-12 h-1.5 bg-base-300 rounded-full mx-auto mb-4"></div>
+            <div id="sheet-content" class="space-y-3"></div>
+            <button id="sheet-close" class="btn btn-ghost rounded-full w-full mt-4">Fermer</button>
+        </div>
+    </div>
+
+    <script>
+        window.USE_MOCK = {{ USE_MOCK|yesno:"true,false" }};
+        window.API_BASE = "{{ API_BASE }}";
+    </script>
+    <script src="{% static 'frontend/js/storage.js' %}?v=20260905"></script>
+    <script src="{% static 'frontend/js/mock.js' %}?v=20260905"></script>
+    <script src="{% static 'frontend/js/api.js' %}?v=20260905b"></script>
+    <script src="{% static 'frontend/js/pdfprint.js' %}?v=20260905"></script>
+    <script src="{% static 'frontend/js/bluetooth.js' %}?v=20260905"></script>
+    <script src="{% static 'frontend/js/sync.js' %}?v=20260905"></script>
+    <script src="{% static 'frontend/js/app.js' %}?v=20260905"></script>
+    <!-- PWA Scripts -->
+    <script src="{% static 'frontend/js/sw-register.js' %}?v=20260905"></script>
+    <script src="{% static 'frontend/js/pwa-install.js' %}?v=20260905"></script>
+    <!-- Mobile Menu Toggle -->
+    <script>
+    (function() {
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const overlay = document.getElementById('mobile-menu-overlay');
+        const closeBtn = document.getElementById('mobile-menu-close');
+
+        if (!menuBtn || !mobileMenu || !overlay) return;
+
+        function openMenu() {
+            mobileMenu.classList.remove('-translate-x-full');
+            overlay.classList.remove('hidden');
+            menuBtn.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMenu() {
+            mobileMenu.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+            menuBtn.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+
+        function toggleMenu() {
+            if (mobileMenu.classList.contains('-translate-x-full')) {
+                openMenu();
+            } else {
+                closeMenu();
+            }
+        }
+
+        menuBtn.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', closeMenu);
+        if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+
+        // Close on navigation link click
+        mobileMenu.querySelectorAll('a, button').forEach(el => {
+            el.addEventListener('click', closeMenu);
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !mobileMenu.classList.contains('-translate-x-full')) {
+                closeMenu();
+            }
+        });
+
+        // Close on window resize to desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                closeMenu();
+            }
+        });
+    })();
+    </script>
+    <!-- Back arrow + App-like sheet -->
+    <script>
+    (function(){
+      const backBtn=document.getElementById('back-btn');
+      if(backBtn){
+        backBtn.classList.remove('hidden');
+        backBtn.addEventListener('click', function(e){
+          e.preventDefault();
+          if(history.length>1) history.back();
+          else window.location.href='/tableau-de-bord/';
+        });
+      }
+      // bottom sheet helpers (produits)
+      const sheet=document.getElementById('product-sheet');
+      const backdrop=document.getElementById('sheet-backdrop');
+      const closeBtn=document.getElementById('sheet-close');
+      function closeSheet(){ if(sheet) sheet.classList.add('hidden'); document.body.style.overflow=''; }
+      if(backdrop) backdrop.addEventListener('click', closeSheet);
+      if(closeBtn) closeBtn.addEventListener('click', closeSheet);
+      window.showProductSheet=function(html){
+        const c=document.getElementById('sheet-content');
+        if(c) c.innerHTML=html;
+        if(sheet){ sheet.classList.remove('hidden'); document.body.style.overflow='hidden'; }
+      };
+      window.closeProductSheet=closeSheet;
+    })();
+    </script>
+
+    <!-- Activate form background on pages with forms -->
+    <script>
+    (function() {
+      const formPages = ['/connexion/', '/inscription/', '/register/', '/vente/nouvelle/', '/produits/', '/produits/tous/', '/historique/', '/tableau-de-bord/'];
+      if (formPages.some(p => window.location.pathname.startsWith(p))) {
+        document.body.classList.add('has-form-background');
+      }
+    })();
+    </script>
+
+<!-- Mode clair forcé - pas de basculement automatique -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>
